@@ -1,0 +1,56 @@
+.card {
+  padding: 16px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.todo-form {
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.todo-form input {
+  padding:8px 10px;
+  border:1px solid #ddd;
+  border-radius:4px;
+  flex:1;
+}
+
+.todo-form button {
+  padding:8px 12px;
+  border-radius:4px;
+  border:none;
+  background:#10b981;
+  color:#fff;
+}
+
+.error { color:#b91c1c; margin-top:8px; }
+
+.todo-list { list-style:none; padding:0; margin-top:12px; }
+.todo-item { display:flex; gap:8px; align-items:center; padding:6px 0; }
+.todo-title { flex:1; }
+
+/* Modal styles */
+.modal-backdrop {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  padding: 16px;
+  border-radius: 6px;
+  max-width: 90%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.modal-actions { display:flex; justify-content:flex-end; margin-top:12px; }
+.modal-actions button { padding:6px 10px; border-radius:4px; border:none; background:#2563eb; color:#fff; }

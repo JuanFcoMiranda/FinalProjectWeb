@@ -1,0 +1,16 @@
+<div class="edit-page">
+  <div class="card">
+    <h2>Edit Todo</h2>
+    @if (loading()) {
+      <div class="loading">Loading…</div>
+    }
+    @if (error()) {
+      <div class="error">{{error()}}</div>
+    }
+    @if (item()) {
+      <div>
+        <app-todo-edit [title]="item()!.title" [saving]="saving()" (save)="save($event)" (cancelled)="cancel()"></app-todo-edit>
+      </div>
+    }
+  </div>
+</div>

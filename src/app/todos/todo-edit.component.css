@@ -1,0 +1,44 @@
+/* Edit form styles matching the list form */
+.todo-edit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.todo-edit input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.todo-edit input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.todo-edit button {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: none;
+  background: #10b981;
+  color: #fff;
+  cursor: pointer;
+}
+
+.todo-edit button:hover:not(:disabled) {
+  background: #059669;
+}
+
+.todo-edit button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.field-error {
+  color: #b91c1c;
+  font-size: 0.9em;
+  margin-top: 4px;
+}
+
+

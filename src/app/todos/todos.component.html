@@ -1,0 +1,47 @@
+<div class="card">
+  <h2>Todo Items</h2>
+
+  <form [formGroup]="form" (ngSubmit)="create()" class="todo-form" novalidate>
+    <input id="title" formControlName="title" placeholder="New todo title" required
+      [class.invalid]="form.get('title')?.touched && form.get('title')?.invalid"
+      [attr.aria-invalid]="form.get('title')?.invalid ? 'true' : 'false'"
+      [attr.aria-describedby]="form.get('title')?.invalid ? 'title-error' : null" />
+    @if (form.get('title')?.touched && form.get('title')?.invalid) {
+      <div id="title-error" class="field-error">
+        @if (form.get('title')?.hasError('required')) {
+          <div>Title is required.</div>
+        }
+      </div>
+    }
+    <button type="submit" [disabled]="loading() || savingId() === -1">Add</button>
+  </form>
+
+  @if (loading()) {
+    <div class="loading">Loading…</div>
+  }
+  @if (message()) {
+    <div class="message">{{message()}}</div>
+  }
+
+  @if (error()) {
+    <div class="error">{{error()}}</div>
+  }
+
+  <!-- Reusable modal component -->
+  <app-modal [open]="!!error()" title="Error" (closed)="clearError()">
+    <p>{{error()}}</p>
+    <div modal-footer>
+      <button (click)="clearError()">Cerrar</button>
+    </div>
+  </app-modal>
+
+  <ul class="todo-list">
+    @for (t of items(); track t.id) {
+      <li class="todo-item">
+        <span class="todo-title">{{t.title}}</span>
+        <button (click)="onEdit(t.id)" [disabled]="savingId() === t.id || loading()">Edit</button>
+        <button (click)="remove(t.id)" [disabled]="savingId() === t.id || loading()">Delete</button>
+      </li>
+    }
+  </ul>
+</div>

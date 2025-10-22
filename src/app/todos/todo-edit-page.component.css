@@ -1,0 +1,27 @@
+.edit-page {
+  padding: 16px;
+}
+
+.card {
+  padding: 16px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  margin-top: 16px;
+}
+
+.error {
+  color: #b91c1c;
+  margin-top: 8px;
+  padding: 12px;
+  background: #fef2f2;
+  border-radius: 4px;
+  border: 1px solid #fecaca;
+}
+
+.loading {
+  color: #6b7280;
+  font-style: italic;
+}
+
+

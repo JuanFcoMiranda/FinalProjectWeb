@@ -1,0 +1,12 @@
+<div class="todo-edit">
+  <input [formControl]="control" placeholder="Edit title" [disabled]="saving" />
+  <button (click)="onSave()" [disabled]="saving">Save</button>
+  <button (click)="onCancel()" [disabled]="saving">Cancel</button>
+  @if (control.touched && control.invalid) {
+    <div class="field-error">
+      @if (control.hasError('required')) {
+        <div>Title is required.</div>
+      }
+    </div>
+  }
+</div>

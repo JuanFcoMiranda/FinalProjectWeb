@@ -1,0 +1,39 @@
+<div class="card">
+  <h2>Login</h2>
+  <form [formGroup]="form" (ngSubmit)="login()" class="login-form" novalidate>
+    <input id="email" formControlName="email" type="email" placeholder="Email" required
+      [class.invalid]="form.get('email')?.touched && form.get('email')?.invalid"
+      [attr.aria-invalid]="form.get('email')?.invalid ? 'true' : 'false'"
+      [attr.aria-describedby]="form.get('email')?.invalid ? 'email-error' : null" />
+    @if (form.get('email')?.touched && form.get('email')?.invalid) {
+      <div id="email-error" class="field-error">
+        @if (form.get('email')?.hasError('required')) {
+          <div>Email is required.</div>
+        }
+        @if (form.get('email')?.hasError('email')) {
+          <div>Enter a valid email address.</div>
+        }
+      </div>
+    }
+
+    <input id="password" formControlName="password" type="password" placeholder="Password" required
+      [class.invalid]="form.get('password')?.touched && form.get('password')?.invalid"
+      [attr.aria-invalid]="form.get('password')?.invalid ? 'true' : 'false'"
+      [attr.aria-describedby]="form.get('password')?.invalid ? 'password-error' : null" />
+    @if (form.get('password')?.touched && form.get('password')?.invalid) {
+      <div id="password-error" class="field-error">
+        @if (form.get('password')?.hasError('required')) {
+          <div>Password is required.</div>
+        }
+        @if (form.get('password')?.hasError('minlength')) {
+          <div>Password must be at least 6 characters.</div>
+        }
+      </div>
+    }
+
+    <button type="submit" [disabled]="form.invalid">Login</button>
+  </form>
+  @if (error()) {
+    <div class="error" role="alert">{{error()}}</div>
+  }
+</div>
