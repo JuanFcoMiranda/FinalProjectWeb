@@ -10,8 +10,7 @@
     "test:headless": "ng test --watch=false --browsers=ChromeHeadless",
     "test:ci": "ng test --watch=false --browsers=ChromeHeadlessCI",
     "test:once": "ng test --watch=false",
-    "test:debug": "node run-tests.js",
-    "test:diagnose": "diagnose-and-test.bat"
+    "test:debug": "node run-tests.js"
   },
   "prettier": {
     "printWidth": 100,
