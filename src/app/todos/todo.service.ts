@@ -20,10 +20,12 @@ export class TodoService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/TodoItems`;
 
-  async list(): Promise<PaginatedList<TodoItemBrief>> {
+  // Accept optional pageNumber/pageSize so tests can exercise different params
+  async list(pageNumber = 1, pageSize = 10): Promise<PaginatedList<TodoItemBrief>> {
     // Defaults to page 1, size 10
     const res = await firstValueFrom(this.http.get<PaginatedList<TodoItemBrief>>(this.base, {
-      params: { pageNumber: 1, pageSize: 10 }
+      // Ensure params are strings
+      params: { pageNumber: String(pageNumber), pageSize: String(pageSize) }
     }));
 
     // Ensure we never return undefined to satisfy strict typing

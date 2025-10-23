@@ -1,0 +1,26 @@
+{
+  "comment": "Archivo de configuración para rutas personalizadas de Chrome",
+  "chromePath": "",
+  "availablePaths": {
+    "windows": {
+      "chrome64": "C:\\Program Files\\Google\\Chrome Beta\\Application\\chrome.exe",
+      "edge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+    },
+    "macos": {
+      "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "chromium": "/Applications/Chromium.app/Contents/MacOS/Chromium",
+      "brave": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+    },
+    "linux": {
+      "chrome": "/usr/bin/google-chrome",
+      "chromium": "/usr/bin/chromium-browser",
+      "chromiumAlt": "/usr/bin/chromium"
+    }
+  },
+  "instructions": {
+    "es": "Para usar una ruta personalizada, edita el campo 'chromePath' arriba con la ruta completa a tu ejecutable de Chrome",
+    "en": "To use a custom path, edit the 'chromePath' field above with the full path to your Chrome executable",
+    "example": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  }
+}
+

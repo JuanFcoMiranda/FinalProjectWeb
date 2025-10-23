@@ -14,9 +14,12 @@ import { Router } from '@angular/router';
 export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  form: FormGroup = new FormGroup({
-    email: new FormControl('', { validators: [Validators.required, Validators.email] }),
-    password: new FormControl('', { validators: [Validators.required, Validators.minLength(6)] })
+  form: FormGroup<{
+    email: FormControl<string | null>;
+    password: FormControl<string | null>;
+  }> = new FormGroup({
+    email: new FormControl<string>('', { validators: [Validators.required, Validators.email] }),
+    password: new FormControl<string>('', { validators: [Validators.required, Validators.minLength(6)] })
   });
   error = signal('');
 
@@ -27,8 +30,8 @@ export class LoginComponent {
         this.form.markAllAsTouched();
         return;
       }
-      const email = this.form.controls['email'].value || '';
-      const password = this.form.controls['password'].value || '';
+      const email = this.form.controls.email.value || '';
+      const password = this.form.controls.password.value || '';
       await this.auth.login(email, password);
       await this.router.navigate(['/']);
     } catch (e: any) {

@@ -30,10 +30,10 @@ describe('ModalComponent', () => {
   it('should emit close on backdrop click', () => {
     component.open = true;
     fixture.detectChanges();
-    spyOn(component.close, 'emit');
+    spyOn(component.closed, 'emit');
     const backdrop = fixture.debugElement.query(By.css('.modal-backdrop'));
     backdrop.triggerEventHandler('click', { target: backdrop.nativeElement });
-    expect(component.close.emit).toHaveBeenCalled();
+    expect(component.closed.emit).toHaveBeenCalled();
   });
 });
 

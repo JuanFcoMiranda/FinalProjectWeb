@@ -51,11 +51,11 @@ export class TodosComponent implements OnInit {
       this.error.set('El título no puede estar vacío');
       return;
     }
-    const title = (this.form.controls['title'].value || '').toString().trim();
+    const title = (this.form.controls.title.value || '').toString().trim();
     try {
       this.savingId.set(-1); // special value for create
       await this.api.create(title);
-      this.form.controls['title'].setValue('');
+      this.form.controls.title.setValue('');
       this.message.set('Created');
       await this.load();
     } catch (e: any) {

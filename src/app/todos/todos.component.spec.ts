@@ -40,10 +40,10 @@ describe('TodosComponent', () => {
   });
 
   it('create() should call service.create and reset form', async () => {
-    component.form.controls['title'].setValue('New todo');
+    component.form.controls.title.setValue('New todo');
     await component.create();
     expect(mockService.create).toHaveBeenCalledWith('New todo');
-    expect(component.form.controls['title'].value).toBe('');
+    expect(component.form.controls.title.value).toBe('');
   });
 
   it('remove() should call service.delete and reload', async () => {
