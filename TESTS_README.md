@@ -136,4 +136,3 @@ diagnose-and-test.bat
 ```
 
 Si tienes problemas, consulta `TEST_TROUBLESHOOTING.md` para ayuda detallada.
-

@@ -127,4 +127,3 @@ Si los tests no se ejecutan en este entorno remoto, es normal debido a limitacio
 - Limitaciones de procesos headless
 
 **Recomendación**: Ejecuta `npm test` en tu máquina local para ver los resultados completos.
-

@@ -50,7 +50,7 @@ Hay **4 métodos** para configurar la ruta de Chrome. Elige el que prefieras:
 ```json
 {
   "chromePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-  ...
+  "comment": "Ajusta esta ruta a tu instalación de Chrome"
 }
 ```
 
@@ -67,8 +67,7 @@ npm test
 ```json
 {
   "comment": "Archivo de configuración para rutas personalizadas de Chrome",
-  "chromePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-  ...
+  "chromePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
 }
 ```
 
@@ -80,33 +79,43 @@ npm test
 
 1. **Edita `test-with-chrome.bat`**
 2. **Encuentra esta línea**:
-   ```bat
-   set CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe
-   ```
+
+```bat
+set CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe
+```
+
 3. **Cámbiala por tu ruta**:
-   ```bat
-   set CHROME_BIN=D:\MiCarpeta\Chrome\chrome.exe
-   ```
+
+```bat
+set CHROME_BIN=D:\MiCarpeta\Chrome\chrome.exe
+```
+
 4. **Guarda y ejecuta**:
-   ```cmd
-   test-with-chrome.bat
-   ```
+
+```cmd
+test-with-chrome.bat
+```
 
 ### Para usuarios de PowerShell
 
 1. **Edita `test-with-chrome.ps1`**
 2. **Encuentra esta línea**:
-   ```powershell
-   $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-   ```
+
+```powershell
+$chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+```
+
 3. **Cámbiala por tu ruta**:
-   ```powershell
-   $chromePath = "D:\MiCarpeta\Chrome\chrome.exe"
-   ```
+
+```powershell
+$chromePath = "D:\MiCarpeta\Chrome\chrome.exe"
+```
+
 4. **Ejecuta** (puede requerir permisos):
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File test-with-chrome.ps1
-   ```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File test-with-chrome.ps1
+```
 
 ---
 
@@ -143,9 +152,9 @@ npm test
    - Click "Aceptar"
 
 3. **Reinicia** tu terminal y ejecuta:
-   ```cmd
-   npm test
-   ```
+```cmd
+npm test
+```
 
 ---
 
@@ -236,20 +245,20 @@ npm install
 **Solución paso a paso**:
 
 1. **Verifica que Chrome funciona**:
-   ```cmd
-   "C:\Program Files\Google\Chrome\Application\chrome.exe" --version
-   ```
+```cmd
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --version
+```
 
 2. **Verifica la variable de entorno**:
-   ```cmd
-   echo %CHROME_BIN%
-   ```
+```cmd
+echo %CHROME_BIN%
+```
 
 3. **Prueba con ruta completa**:
-   ```cmd
-   set CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe
-   npm test
-   ```
+```cmd
+set CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe
+npm test
+```
 
 ### 🔍 Cómo encontrar la ruta de Chrome automáticamente
 
@@ -273,19 +282,19 @@ Get-ChildItem "C:\Program Files\" -Recurse -Filter chrome.exe -ErrorAction Silen
 Si no quieres instalar Chrome por separado, puedes usar Puppeteer que incluye Chromium:
 
 1. **Instala Puppeteer**:
-   ```cmd
-   npm install --save-dev puppeteer
-   ```
+```cmd
+npm install --save-dev puppeteer
+```
 
 2. **Edita `karma.conf.js`** y descomenta:
-   ```javascript
-   process.env.CHROME_BIN = require('puppeteer').executablePath();
-   ```
+```javascript
+process.env.CHROME_BIN = require('puppeteer').executablePath();
+```
 
 3. **Ejecuta los tests**:
-   ```cmd
-   npm test
-   ```
+```cmd
+npm test
+```
 
 ---
 
@@ -326,4 +335,3 @@ npm test
 ```
 
 Si ves los tests ejecutándose sin errores de "Chrome not found", ¡la configuración es correcta! 🎉
-
