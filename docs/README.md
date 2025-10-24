@@ -58,3 +58,10 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
+## 📚 Documentación del Proyecto
+
+- **[CI/CD Guide](CI_CD_GUIDE.md)** - Guía completa sobre la pipeline de integración continua con GitHub Actions
+- **[Test Guide](TEST_GUIDE.md)** - Guía detallada para ejecutar y escribir tests
+- **[Test Troubleshooting](TEST_TROUBLESHOOTING.md)** - Solución de problemas comunes con tests
+- **[Chrome Setup Guide](CHROME_SETUP_GUIDE.md)** - Configuración de Chrome para ejecutar tests
+
