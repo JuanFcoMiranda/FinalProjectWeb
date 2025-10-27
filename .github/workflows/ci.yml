@@ -66,11 +66,11 @@ jobs:
             }
 
             // Display test summary
-            if (testDetails && testDetails.result) {
-              const totalTests = testDetails.result.total || 0;
-              const passedTests = testDetails.result.success || 0;
-              const failedTests = testDetails.result.failed || 0;
-              const skippedTests = testDetails.result.skipped || 0;
+            if (testDetails && testDetails.summary) {
+              const totalTests = testDetails.summary.success + testDetails.summary.failed + testDetails.summary.skipped;
+              const passedTests = testDetails.summary.success || 0;
+              const failedTests = testDetails.summary.failed || 0;
+              const skippedTests = testDetails.summary.skipped || 0;
 
               fs.appendFileSync(summaryPath, `## ${testIcon} Tests: ${testStatus}\n\n`);
               fs.appendFileSync(summaryPath, `**Total:** ${totalTests} | `);
@@ -78,33 +78,50 @@ jobs:
               fs.appendFileSync(summaryPath, `**Failed:** ❌ ${failedTests} | `);
               fs.appendFileSync(summaryPath, `**Skipped:** ⏭️ ${skippedTests}\n\n`);
 
-              // Show individual test results
-              if (testDetails.result.suites && testDetails.result.suites.length > 0) {
+              // Show individual test results in a table
+              if (testDetails.result) {
                 fs.appendFileSync(summaryPath, '### 📋 Test Details\n\n');
 
-                for (const suite of testDetails.result.suites) {
-                  if (suite.suite && suite.suite.length > 0) {
-                    fs.appendFileSync(summaryPath, `#### ${suite.suite.join(' > ')}\n\n`);
+                // Create table header
+                fs.appendFileSync(summaryPath, '| Suite | Test | Status | Time |\n');
+                fs.appendFileSync(summaryPath, '|-------|------|--------|------|\n');
+
+                // Collect all tests
+                const allTests = [];
+                for (const browserId in testDetails.result) {
+                  const tests = testDetails.result[browserId];
+                  for (const test of tests) {
+                    allTests.push(test);
                   }
+                }
 
-                  if (suite.tests && suite.tests.length > 0) {
-                    for (const test of suite.tests) {
-                      const testIcon = test.success ? '✅' : test.skipped ? '⏭️' : '❌';
-                      const testName = test.description || 'Unknown test';
-                      const duration = test.time ? ` (${test.time}ms)` : '';
+                // Display tests in table format
+                for (const test of allTests) {
+                  const suiteName = test.suite.join(' > ') || 'Uncategorized';
+                  const testIcon = test.success ? '✅' : test.skipped ? '⏭️' : '❌';
+                  const testName = test.description || 'Unknown test';
+                  const duration = test.time ? `${test.time}ms` : '-';
 
-                      fs.appendFileSync(summaryPath, `${testIcon} ${testName}${duration}\n`);
+                  fs.appendFileSync(summaryPath, `| ${suiteName} | ${testName} | ${testIcon} | ${duration} |\n`);
+                }
 
-                      // Show error details for failed tests
-                      if (!test.success && !test.skipped && test.log && test.log.length > 0) {
-                        fs.appendFileSync(summaryPath, '```\n');
-                        for (const log of test.log) {
-                          fs.appendFileSync(summaryPath, log + '\n');
-                        }
-                        fs.appendFileSync(summaryPath, '```\n');
+                fs.appendFileSync(summaryPath, '\n');
+
+                // Show error details for failed tests (if any)
+                const failedTests = allTests.filter(t => !t.success && !t.skipped);
+                if (failedTests.length > 0) {
+                  fs.appendFileSync(summaryPath, '### ❌ Failed Test Details\n\n');
+                  for (const test of failedTests) {
+                    const suiteName = test.suite.join(' > ') || 'Uncategorized';
+                    const testName = test.description || 'Unknown test';
+                    fs.appendFileSync(summaryPath, `#### ${suiteName} > ${testName}\n\n`);
+                    if (test.log && test.log.length > 0) {
+                      fs.appendFileSync(summaryPath, '```\n');
+                      for (const log of test.log) {
+                        fs.appendFileSync(summaryPath, log + '\n');
                       }
+                      fs.appendFileSync(summaryPath, '```\n\n');
                     }
-                    fs.appendFileSync(summaryPath, '\n');
                   }
                 }
               }
@@ -150,12 +167,42 @@ jobs:
               fs.appendFileSync(summaryPath, `| **Branches** | ${branchesPct}% | ${hitBranches} | ${totalBranches} |\n`);
               fs.appendFileSync(summaryPath, '\n');
 
-              // Coverage bar
-              const barLength = 20;
-              const filledLength = Math.round((overallPct / 100) * barLength);
-              const emptyLength = barLength - filledLength;
-              const bar = '█'.repeat(filledLength) + '░'.repeat(emptyLength);
-              fs.appendFileSync(summaryPath, `### Coverage Bar\n\`${bar}\` ${linesPct}%\n\n`);
+              // Coverage bar with elegant styling
+              fs.appendFileSync(summaryPath, `### 📈 Coverage Progress\n\n`);
+
+              // Choose color and emoji based on coverage percentage
+              let statusBadge = '';
+              let statusEmoji = '';
+              if (overallPct >= 80) {
+                statusBadge = '![Coverage](https://img.shields.io/badge/coverage-excellent-brightgreen)';
+                statusEmoji = '🎉';
+              } else if (overallPct >= 60) {
+                statusBadge = '![Coverage](https://img.shields.io/badge/coverage-good-yellow)';
+                statusEmoji = '👍';
+              } else if (overallPct >= 40) {
+                statusBadge = '![Coverage](https://img.shields.io/badge/coverage-needs_improvement-orange)';
+                statusEmoji = '⚠️';
+              } else {
+                statusBadge = '![Coverage](https://img.shields.io/badge/coverage-low-red)';
+                statusEmoji = '🔴';
+              }
+
+              // Create a visual bar using block characters
+              const totalBlocks = 30;
+              const filledBlocks = Math.round((overallPct / 100) * totalBlocks);
+              const emptyBlocks = totalBlocks - filledBlocks;
+
+              // Use Unicode block characters for smooth gradient
+              const fullBlock = '█';
+              const emptyBlock = '░';
+              const visualBar = fullBlock.repeat(filledBlocks) + emptyBlock.repeat(emptyBlocks);
+
+              fs.appendFileSync(summaryPath, `<table><tr><td>\n\n`);
+              fs.appendFileSync(summaryPath, `${statusEmoji} **${linesPct}%** Lines Covered\n\n`);
+              fs.appendFileSync(summaryPath, '```\n');
+              fs.appendFileSync(summaryPath, `${visualBar}\n`);
+              fs.appendFileSync(summaryPath, '```\n\n');
+              fs.appendFileSync(summaryPath, `</td></tr></table>\n\n`);
             } else {
               fs.appendFileSync(summaryPath, `## ❌ Coverage Report Not Found\n\n`);
               fs.appendFileSync(summaryPath, `Could not find coverage file at: \`${covFile}\`\n\n`);

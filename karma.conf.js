@@ -81,7 +81,7 @@ module.exports = function (config) {
     },
     jsonReporter: {
       stdout: false,
-      outputFile: './coverage/proyectoFinal/test-results.json'
+      outputFile: require('path').join(__dirname, './coverage/proyectoFinal/test-results.json')
     },
     reporters: ['progress', 'kjhtml', 'json'],
     browsers: ['ChromeHeadless'],
