@@ -33,15 +33,75 @@ jobs:
 
       - name: Run tests
         id: run-tests
-        run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+        run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI --code-coverage
         continue-on-error: true
 
-      - name: Comment Test Coverage
-        uses: AthleticNet/comment-test-coverage@1.1
+      - name: Generate CI Summary (tests + coverage)
+        uses: actions/github-script@v6
+        env:
+          TEST_OUTCOME: ${{ steps.run-tests.outcome }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: coverage/coverage-summary.json
-          title: Karma Test Coverage
+          script: |
+            const fs = require('fs');
+            const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+
+            // Header
+            fs.appendFileSync(summaryPath, '# 📊 Test & Coverage Report\n\n');
+
+            // Tests section
+            const testsPassed = (process.env.TEST_OUTCOME === 'success');
+            const testIcon = testsPassed ? '✅' : '❌';
+            const testStatus = testsPassed ? 'Passed' : 'Failed';
+
+            fs.appendFileSync(summaryPath, `## ${testIcon} Tests: ${testStatus}\n\n`);
+
+            // Coverage section
+            const covFile = 'coverage/proyectoFinal/lcov.info';
+            if (fs.existsSync(covFile)) {
+              const s = fs.readFileSync(covFile, 'utf8');
+
+              // Parse all metrics from lcov.info
+              let totalLines = 0, hitLines = 0;
+              let totalFunctions = 0, hitFunctions = 0;
+              let totalBranches = 0, hitBranches = 0;
+
+              const lines = s.split('\n');
+              for (const line of lines) {
+                if (line.startsWith('LF:')) totalLines += parseInt(line.substring(3));
+                else if (line.startsWith('LH:')) hitLines += parseInt(line.substring(3));
+                else if (line.startsWith('FNF:')) totalFunctions += parseInt(line.substring(4));
+                else if (line.startsWith('FNH:')) hitFunctions += parseInt(line.substring(4));
+                else if (line.startsWith('BRF:')) totalBranches += parseInt(line.substring(4));
+                else if (line.startsWith('BRH:')) hitBranches += parseInt(line.substring(4));
+              }
+
+              // Calculate percentages
+              const linesPct = totalLines ? ((hitLines / totalLines) * 100).toFixed(2) : 'N/A';
+              const funcsPct = totalFunctions ? ((hitFunctions / totalFunctions) * 100).toFixed(2) : 'N/A';
+              const branchesPct = totalBranches ? ((hitBranches / totalBranches) * 100).toFixed(2) : 'N/A';
+
+              // Overall coverage (based on lines)
+              const overallPct = parseFloat(linesPct);
+              const coverageIcon = overallPct >= 80 ? '🟢' : overallPct >= 60 ? '🟡' : '🔴';
+
+              fs.appendFileSync(summaryPath, `## ${coverageIcon} Code Coverage: ${linesPct}%\n\n`);
+              fs.appendFileSync(summaryPath, '| Metric | Coverage | Covered | Total |\n');
+              fs.appendFileSync(summaryPath, '|--------|----------|---------|-------|\n');
+              fs.appendFileSync(summaryPath, `| **Lines** | ${linesPct}% | ${hitLines} | ${totalLines} |\n`);
+              fs.appendFileSync(summaryPath, `| **Functions** | ${funcsPct}% | ${hitFunctions} | ${totalFunctions} |\n`);
+              fs.appendFileSync(summaryPath, `| **Branches** | ${branchesPct}% | ${hitBranches} | ${totalBranches} |\n`);
+              fs.appendFileSync(summaryPath, '\n');
+
+              // Coverage bar
+              const barLength = 20;
+              const filledLength = Math.round((overallPct / 100) * barLength);
+              const emptyLength = barLength - filledLength;
+              const bar = '█'.repeat(filledLength) + '░'.repeat(emptyLength);
+              fs.appendFileSync(summaryPath, `### Coverage Bar\n\`${bar}\` ${linesPct}%\n\n`);
+            } else {
+              fs.appendFileSync(summaryPath, `## ❌ Coverage Report Not Found\n\n`);
+              fs.appendFileSync(summaryPath, `Could not find coverage file at: \`${covFile}\`\n\n`);
+            }
 
 #      - name: Upload coverage to Codecov
 #        if: success()
