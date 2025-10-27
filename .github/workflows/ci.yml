@@ -140,6 +140,9 @@ jobs:
               let totalFunctions = 0, hitFunctions = 0;
               let totalBranches = 0, hitBranches = 0;
 
+              // Count DA (lines) entries for statements coverage
+              let totalStatements = 0, hitStatements = 0;
+
               const lines = s.split('\n');
               for (const line of lines) {
                 if (line.startsWith('LF:')) totalLines += parseInt(line.substring(3));
@@ -148,12 +151,25 @@ jobs:
                 else if (line.startsWith('FNH:')) hitFunctions += parseInt(line.substring(4));
                 else if (line.startsWith('BRF:')) totalBranches += parseInt(line.substring(4));
                 else if (line.startsWith('BRH:')) hitBranches += parseInt(line.substring(4));
+                else if (line.startsWith('DA:')) {
+                  totalStatements++;
+                  const parts = line.substring(3).split(',');
+                  if (parts.length >= 2 && parseInt(parts[1]) > 0) {
+                    hitStatements++;
+                  }
+                }
               }
 
               // Calculate percentages
               const linesPct = totalLines ? ((hitLines / totalLines) * 100).toFixed(2) : 'N/A';
               const funcsPct = totalFunctions ? ((hitFunctions / totalFunctions) * 100).toFixed(2) : 'N/A';
               const branchesPct = totalBranches ? ((hitBranches / totalBranches) * 100).toFixed(2) : 'N/A';
+              const statementsPct = totalStatements ? ((hitStatements / totalStatements) * 100).toFixed(2) : 'N/A';
+
+              // Estimate cyclomatic complexity (Complexity = Branches + Functions + 1)
+              // This is an approximation based on the number of decision points
+              const estimatedComplexity = totalBranches + totalFunctions + 1;
+              const avgComplexityPerFunction = totalFunctions > 0 ? (estimatedComplexity / totalFunctions).toFixed(2) : 'N/A';
 
               // Overall coverage (based on lines)
               const overallPct = parseFloat(linesPct);
@@ -162,10 +178,53 @@ jobs:
               fs.appendFileSync(summaryPath, `## ${coverageIcon} Code Coverage: ${linesPct}%\n\n`);
               fs.appendFileSync(summaryPath, '| Metric | Coverage | Covered | Total |\n');
               fs.appendFileSync(summaryPath, '|--------|----------|---------|-------|\n');
+              fs.appendFileSync(summaryPath, `| **Statements** | ${statementsPct}% | ${hitStatements} | ${totalStatements} |\n`);
               fs.appendFileSync(summaryPath, `| **Lines** | ${linesPct}% | ${hitLines} | ${totalLines} |\n`);
               fs.appendFileSync(summaryPath, `| **Functions** | ${funcsPct}% | ${hitFunctions} | ${totalFunctions} |\n`);
               fs.appendFileSync(summaryPath, `| **Branches** | ${branchesPct}% | ${hitBranches} | ${totalBranches} |\n`);
+              fs.appendFileSync(summaryPath, `| **Complexity** | ~${avgComplexityPerFunction} | - | ${estimatedComplexity} |\n`);
               fs.appendFileSync(summaryPath, '\n');
+              fs.appendFileSync(summaryPath, `> 📊 **Estimated Cyclomatic Complexity:** ${estimatedComplexity} total, ~${avgComplexityPerFunction} avg per function\n\n`);
+
+              // Read coverage-summary.json for per-file complexity
+              const coverageSummaryFile = 'coverage/proyectoFinal/coverage-summary.json';
+              if (fs.existsSync(coverageSummaryFile)) {
+                try {
+                  const coverageData = JSON.parse(fs.readFileSync(coverageSummaryFile, 'utf8'));
+
+                  fs.appendFileSync(summaryPath, '### 🔍 Complexity by File\n\n');
+                  fs.appendFileSync(summaryPath, '| File | Functions | Branches | Est. Complexity | Avg/Function |\n');
+                  fs.appendFileSync(summaryPath, '|------|-----------|----------|-----------------|---------------|\n');
+
+                  for (const filePath in coverageData) {
+                    if (filePath === 'total') continue;
+
+                    const fileData = coverageData[filePath];
+                    const fileName = filePath.split('\\').pop() || filePath.split('/').pop() || filePath;
+                    const fileFunctions = fileData.functions.total;
+                    const fileBranches = fileData.branches.total;
+                    const fileComplexity = fileBranches + fileFunctions + 1;
+                    const fileAvgComplexity = fileFunctions > 0 ? (fileComplexity / fileFunctions).toFixed(2) : 'N/A';
+
+                    // Add emoji indicator based on complexity
+                    let complexityIndicator = '';
+                    if (fileFunctions > 0) {
+                      const avg = parseFloat(fileAvgComplexity);
+                      if (avg <= 5) complexityIndicator = '🟢'; // Low complexity - good
+                      else if (avg <= 10) complexityIndicator = '🟡'; // Medium complexity
+                      else if (avg <= 20) complexityIndicator = '🟠'; // High complexity
+                      else complexityIndicator = '🔴'; // Very high complexity
+                    }
+
+                    fs.appendFileSync(summaryPath, `| ${fileName} | ${fileFunctions} | ${fileBranches} | ${complexityIndicator} ${fileComplexity} | ${fileAvgComplexity} |\n`);
+                  }
+
+                  fs.appendFileSync(summaryPath, '\n');
+                  fs.appendFileSync(summaryPath, '> 🟢 Low (≤5) | 🟡 Medium (6-10) | 🟠 High (11-20) | 🔴 Very High (>20)\n\n');
+                } catch (e) {
+                  console.log('Could not read coverage-summary.json:', e);
+                }
+              }
 
               // Coverage bar with elegant styling
               fs.appendFileSync(summaryPath, `### 📈 Coverage Progress\n\n`);

@@ -76,8 +76,17 @@ module.exports = function (config) {
       reporters: [
         { type: 'html' },
         { type: 'text-summary' },
-        { type: 'lcov' }
-      ]
+        { type: 'lcov' },
+        { type: 'json-summary', subdir: '.', file: 'coverage-summary.json' }
+      ],
+      check: {
+        global: {
+          statements: 0,
+          branches: 0,
+          functions: 0,
+          lines: 0
+        }
+      }
     },
     jsonReporter: {
       stdout: false,
