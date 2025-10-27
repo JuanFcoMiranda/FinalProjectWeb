@@ -1,10 +1,6 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
-  pull_request:
-    branches:
-      - main
-      - develop
   push:
     branches:
       - main
@@ -19,7 +15,7 @@ jobs:
         node-version: [20.x]
 
     steps:
-      - name: Checkout código
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Configurar Node.js ${{ matrix.node-version }}
@@ -28,19 +24,69 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: npm ci
 
-      - name: Verificar compilación
+      - name: Build project
         run: npm run build
 
-      - name: Ejecutar tests
+      - name: Run tests
         run: npm run test:headless
+#
+#      - name: Upload coverage to Codecov
+#        if: success()
+#        uses: codecov/codecov-action@v3
+#        with:
+#          fail_ci_if_error: false
+#          files: ./coverage/final-project-web/lcov.info
 
-      - name: Subir cobertura de código
-        if: success()
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: false
-          files: ./coverage/proyecto-final/lcov.info
+#  deploy-staging:
+#    needs: build-and-test
+#    if: github.ref == 'refs/heads/develop'
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout código
+#        uses: actions/checkout@v4
+#
+#      - name: Deploy a Staging
+#        run: |
+#          echo "🚀 Desplegando a ambiente de Staging..."
+#          # Aquí puedes agregar tus comandos de deploy a staging
+#          # Por ejemplo: npm run deploy:staging
+#
+#      - name: Notificar deploy de Staging
+#        run: echo "✅ Deploy a Staging completado"
+#
+#  deploy-production:
+#    needs: build-and-test
+#    if: github.ref == 'refs/heads/main'
+#    runs-on: ubuntu-latest
 
+#    steps:
+#      - name: Checkout código
+#        uses: actions/checkout@v4
+#
+#      - name: Deploy a Production
+#        run: |
+#          echo "🚀 Desplegando a ambiente de Producción..."
+#          # Aquí puedes agregar tus comandos de deploy a producción
+#          # Por ejemplo: npm run deploy:prod
+#
+#      - name: Notificar deploy de Production
+#        run: echo "✅ Deploy a Production completado"
+#
+#      - name: Crear Release Tag
+#        if: success()
+#        uses: actions/github-script@v7
+#        with:
+#          script: |
+#            const date = new Date().toISOString().split('T')[0];
+#            const tagName = `release-${date}-${context.runNumber}`;
+#
+#            github.rest.git.createRef({
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              ref: `refs/tags/${tagName}`,
+#              sha: context.sha
+#            });
