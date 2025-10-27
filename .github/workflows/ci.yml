@@ -53,7 +53,65 @@ jobs:
             const testIcon = testsPassed ? '✅' : '❌';
             const testStatus = testsPassed ? 'Passed' : 'Failed';
 
-            fs.appendFileSync(summaryPath, `## ${testIcon} Tests: ${testStatus}\n\n`);
+            // Read test results JSON
+            const testResultsFile = 'coverage/proyectoFinal/test-results.json';
+            let testDetails = null;
+            if (fs.existsSync(testResultsFile)) {
+              try {
+                const testResultsContent = fs.readFileSync(testResultsFile, 'utf8');
+                testDetails = JSON.parse(testResultsContent);
+              } catch (e) {
+                console.log('Error parsing test results:', e);
+              }
+            }
+
+            // Display test summary
+            if (testDetails && testDetails.result) {
+              const totalTests = testDetails.result.total || 0;
+              const passedTests = testDetails.result.success || 0;
+              const failedTests = testDetails.result.failed || 0;
+              const skippedTests = testDetails.result.skipped || 0;
+
+              fs.appendFileSync(summaryPath, `## ${testIcon} Tests: ${testStatus}\n\n`);
+              fs.appendFileSync(summaryPath, `**Total:** ${totalTests} | `);
+              fs.appendFileSync(summaryPath, `**Passed:** ✅ ${passedTests} | `);
+              fs.appendFileSync(summaryPath, `**Failed:** ❌ ${failedTests} | `);
+              fs.appendFileSync(summaryPath, `**Skipped:** ⏭️ ${skippedTests}\n\n`);
+
+              // Show individual test results
+              if (testDetails.result.suites && testDetails.result.suites.length > 0) {
+                fs.appendFileSync(summaryPath, '### 📋 Test Details\n\n');
+
+                for (const suite of testDetails.result.suites) {
+                  if (suite.suite && suite.suite.length > 0) {
+                    fs.appendFileSync(summaryPath, `#### ${suite.suite.join(' > ')}\n\n`);
+                  }
+
+                  if (suite.tests && suite.tests.length > 0) {
+                    for (const test of suite.tests) {
+                      const testIcon = test.success ? '✅' : test.skipped ? '⏭️' : '❌';
+                      const testName = test.description || 'Unknown test';
+                      const duration = test.time ? ` (${test.time}ms)` : '';
+
+                      fs.appendFileSync(summaryPath, `${testIcon} ${testName}${duration}\n`);
+
+                      // Show error details for failed tests
+                      if (!test.success && !test.skipped && test.log && test.log.length > 0) {
+                        fs.appendFileSync(summaryPath, '```\n');
+                        for (const log of test.log) {
+                          fs.appendFileSync(summaryPath, log + '\n');
+                        }
+                        fs.appendFileSync(summaryPath, '```\n');
+                      }
+                    }
+                    fs.appendFileSync(summaryPath, '\n');
+                  }
+                }
+              }
+            } else {
+              fs.appendFileSync(summaryPath, `## ${testIcon} Tests: ${testStatus}\n\n`);
+              fs.appendFileSync(summaryPath, `_Test details not available_\n\n`);
+            }
 
             // Coverage section
             const covFile = 'coverage/proyectoFinal/lcov.info';
