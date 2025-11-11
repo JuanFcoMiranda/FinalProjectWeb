@@ -19,12 +19,23 @@ COPY --chown=angular:nodejs package*.json ./
 # Cambiar a usuario no privilegiado antes de instalar dependencias
 USER angular
 
-RUN npm ci --legacy-peer-deps
+RUN npm ci --legacy-peer-deps --ignore-scripts
+
+# Establecer permisos de solo lectura en package files después de la instalación (seguridad)
+USER root
+RUN chmod 0444 package*.json
+USER angular
 
 # Copiar solo los archivos necesarios para el build
 # Evita copiar archivos sensibles o innecesarios (.dockerignore los excluye)
 COPY --chown=angular:nodejs tsconfig*.json ./
 COPY --chown=angular:nodejs angular.json ./
+
+# Establecer permisos de solo lectura en archivos de configuración (seguridad)
+USER root
+RUN chmod 0444 tsconfig*.json angular.json
+USER angular
+
 COPY --chown=angular:nodejs src ./src
 COPY --chown=angular:nodejs public ./public
 
@@ -49,7 +60,12 @@ COPY --chown=angular:nodejs package*.json ./
 # Cambiar a usuario no privilegiado
 USER angular
 
-RUN npm install
+RUN npm install --ignore-scripts
+
+# Establecer permisos de solo lectura en package files después de la instalación (seguridad)
+USER root
+RUN chmod 0444 package*.json
+USER angular
 
 # Copiar solo los archivos necesarios para desarrollo
 # Los archivos sensibles están excluidos por .dockerignore
@@ -58,6 +74,9 @@ COPY --chown=angular:nodejs angular.json ./
 COPY --chown=angular:nodejs karma.conf.js ./
 COPY --chown=angular:nodejs src ./src
 COPY --chown=angular:nodejs public ./public
+
+# Establecer permisos de solo lectura en archivos de configuración (seguridad)
+RUN chmod 0444 tsconfig*.json angular.json karma.conf.js
 
 # Variables de entorno para desarrollo
 ENV API_URL=http://finalproject:8080/api
@@ -71,6 +90,8 @@ CMD ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "2000"]
 
 # Etapa 3: Producción con Nginx
 FROM nginx:alpine AS production
+
+USER nginx
 
 # Copiar archivos construidos desde la etapa de build
 COPY --from=build /app/dist/proyecto-final /usr/share/nginx/html
