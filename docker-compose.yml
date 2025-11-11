@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Servicio de desarrollo con hot-reload
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finalproject-dev
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./src:/app/src
+      - ./angular.json:/app/angular.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+    environment:
+      - API_URL=http://finalproject:8080/api
+      - CHOKIDAR_USEPOLLING=true
+    command: npm start -- --host 0.0.0.0 --poll 2000
+    networks:
+      - finalproject-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  finalproject-network:
+    name: finalproject-network
+    driver: bridge
+    external: false
