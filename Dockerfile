@@ -19,7 +19,7 @@ COPY --chown=angular:nodejs package*.json ./
 # Cambiar a usuario no privilegiado antes de instalar dependencias
 USER angular
 
-RUN npm ci --legacy-peer-deps
+RUN npm ci --legacy-peer-deps --ignore-scripts
 
 # Copiar solo los archivos necesarios para el build
 # Evita copiar archivos sensibles o innecesarios (.dockerignore los excluye)
@@ -49,7 +49,7 @@ COPY --chown=angular:nodejs package*.json ./
 # Cambiar a usuario no privilegiado
 USER angular
 
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copiar solo los archivos necesarios para desarrollo
 # Los archivos sensibles están excluidos por .dockerignore
@@ -71,6 +71,8 @@ CMD ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "2000"]
 
 # Etapa 3: Producción con Nginx
 FROM nginx:alpine AS production
+
+USER nginx
 
 # Copiar archivos construidos desde la etapa de build
 COPY --from=build /app/dist/proyecto-final /usr/share/nginx/html
