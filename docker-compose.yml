@@ -6,7 +6,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: finalproject-dev
+      target: development
+    container_name: proyectofinal-web-dev
+    # Ejecutar como usuario no privilegiado (coincide con el Dockerfile)
+    user: "1001:1001"
     ports:
       - "4200:4200"
     volumes:
@@ -17,14 +20,12 @@ services:
     environment:
       - API_URL=http://finalproject:8080/api
       - CHOKIDAR_USEPOLLING=true
-    command: npm start -- --host 0.0.0.0 --poll 2000
     networks:
       - finalproject-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
 networks:
+  # Usa la red existente del contenedor finalproject
   finalproject-network:
-    name: finalproject-network
-    driver: bridge
-    external: false
+    external: true

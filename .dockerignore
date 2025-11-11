@@ -1,18 +1,60 @@
+# Dependencies
 node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Build output
 dist
+.angular
+*.tsbuildinfo
+
+# Testing
 coverage
+*.spec.ts
+karma.conf.js
+test-summary-preview.js
+
+# Git
 .git
 .gitignore
-*.log
-npm-debug.log*
-.DS_Store
-Thumbs.db
-.vscode
-.idea
-*.md
-!README.md
+.gitattributes
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Docker
 Dockerfile*
 docker-compose*.yml
+.dockerignore
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Environment files (sensitive data)
 .env
-.angular
+.env.*
+!.env.example
+
+# Documentation (not needed in container)
+*.md
+!README.md
+docs
+
+# Other
+*.tmp
+*.temp
+.cache
 
