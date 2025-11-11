@@ -1,31 +1,18 @@
-# Node and build artifacts
 node_modules
 dist
 coverage
-
-# Environment and credentials
-.env
-.env.*
-secrets/
-
-# Git
 .git
 .gitignore
-
-# IDE
-.vscode
-.idea
-
-# Docker
-Dockerfile*
-docker-compose*.yml
-
-# Logs
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-
-# OS
+*.log
+npm-debug.log*
 .DS_Store
 Thumbs.db
+.vscode
+.idea
+*.md
+!README.md
+Dockerfile*
+docker-compose*.yml
+.env
+.angular
 
