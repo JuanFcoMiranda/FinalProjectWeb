@@ -1,4 +1,4 @@
-# Dockerfile único para desarrollo y producción
+# Dockerfile único para desarrollo/producción
 # Build arg para determinar el entorno (dev o prod)
 ARG BUILD_ENV=prod
 
@@ -10,25 +10,26 @@ RUN addgroup -g 1001 -S nodejs && adduser -S angular -u 1001
 
 WORKDIR /app
 
-# Cambiar propietario del directorio de trabajo
-RUN chown -R angular:nodejs /app
+# Asegurarnos de que /app tiene los permisos adecuados
+RUN chown -R root:root /app && chmod 0755 /app
 
-# Copiar archivos de dependencias
-COPY --chown=angular:nodejs package*.json ./
+# Copiar archivos de dependencias (establecer owner y permisos en el COPY)
+# --chmod requiere BuildKit, pero es ampliamente soportado en entornos modernos
+COPY --chown=angular:nodejs --chmod=0444 package*.json ./
+# Instalar dependencias como root para que npm pueda escribir node_modules
+RUN npm ci --legacy-peer-deps --ignore-scripts \
+    && chown -R angular:nodejs /app/node_modules /app/package-lock.json || true
 
-# Cambiar a usuario no privilegiado antes de instalar dependencias
-USER angular
-
-RUN npm ci --legacy-peer-deps --ignore-scripts
-
-# Copiar solo los archivos necesarios para el build
-# Evita copiar archivos sensibles o innecesarios (.dockerignore los excluye)
-COPY --chown=angular:nodejs tsconfig*.json ./
-COPY --chown=angular:nodejs angular.json ./
+# Copiar solo los archivos necesarios para el build (los sensibles deben estar en .dockerignore)
+COPY --chown=angular:nodejs --chmod=0444 tsconfig*.json ./
+COPY --chown=angular:nodejs --chmod=0444 angular.json ./
 COPY --chown=angular:nodejs src ./src
 COPY --chown=angular:nodejs public ./public
 
-# Construir la aplicación para producción
+# Cambiar a usuario no privilegiado para pasos siguientes
+USER angular
+
+# Construir la aplicación para producción si corresponde
 ARG BUILD_ENV
 RUN if [ "$BUILD_ENV" = "prod" ]; then npm run build; fi
 
@@ -40,24 +41,27 @@ RUN addgroup -g 1001 -S nodejs && adduser -S angular -u 1001
 
 WORKDIR /app
 
-# Cambiar propietario del directorio de trabajo
-RUN chown -R angular:nodejs /app
+# Asegurarnos de que /app tiene los permisos adecuados
+RUN chown -R root:root /app && chmod 0755 /app
 
-# Copiar package files
-COPY --chown=angular:nodejs package*.json ./
+# Copiar package files con permisos de solo lectura y propietario configurado
+COPY --chown=angular:nodejs --chmod=0444 package*.json ./
+# Instalar dependencias como root, luego asegurar ownership
+RUN npm install --ignore-scripts \
+    && chown -R angular:nodejs /app/node_modules /app/package-lock.json || true
+
+# Copiar solo los archivos necesarios para desarrollo (excluir sensibles a través de .dockerignore)
+COPY --chown=angular:nodejs --chmod=0444 tsconfig*.json ./
+COPY --chown=angular:nodejs --chmod=0444 angular.json ./
+COPY --chown=angular:nodejs --chmod=0444 karma.conf.js ./
+COPY --chown=angular:nodejs src ./src
+COPY --chown=angular:nodejs public ./public
+
+# Traspasar propiedad a usuario no privilegiado
+RUN chown -R angular:nodejs /app || true
 
 # Cambiar a usuario no privilegiado
 USER angular
-
-RUN npm install --ignore-scripts
-
-# Copiar solo los archivos necesarios para desarrollo
-# Los archivos sensibles están excluidos por .dockerignore
-COPY --chown=angular:nodejs tsconfig*.json ./
-COPY --chown=angular:nodejs angular.json ./
-COPY --chown=angular:nodejs karma.conf.js ./
-COPY --chown=angular:nodejs src ./src
-COPY --chown=angular:nodejs public ./public
 
 # Variables de entorno para desarrollo
 ENV API_URL=http://finalproject:8080/api
@@ -72,6 +76,7 @@ CMD ["npm", "start", "--", "--host", "0.0.0.0", "--poll", "2000"]
 # Etapa 3: Producción con Nginx
 FROM nginx:alpine AS production
 
+# Usar usuario nginx (ya no root)
 USER nginx
 
 # Copiar archivos construidos desde la etapa de build
@@ -85,4 +90,3 @@ EXPOSE 80
 
 # Comando para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]
-
