@@ -1,67 +1,122 @@
-# ProyectoFinal
+# 📚 Documentación del Proyecto
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.6.
+Bienvenido a la documentación del proyecto ProyectoFinal. Esta carpeta contiene toda la documentación organizada por temas.
 
-## Development server
+## 📂 Estructura de la Documentación
 
-To start a local development server, run:
-
-```bash
-ng serve
+```
+docs/
+├── ci/          # Documentación de CI/CD y GitHub Actions
+├── config/      # Guías de configuración (Chrome, etc.)
+├── tests/       # Documentación de tests y cobertura
+└── README.md    # Este archivo (índice de documentación)
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## 🚀 Inicio Rápido
 
-## Code scaffolding
+### Para empezar a trabajar en el proyecto:
+1. Lee el [README principal](../README.md) del proyecto
+2. Revisa la [Guía Rápida de Tests](tests/TESTS_README.md)
+3. Si Chrome no funciona, consulta [Chrome Quick Start](config/CHROME_CONFIG_README.md)
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Para contribuir con un Pull Request:
+1. Lee [Ejemplos de Workflow](ci/CI_WORKFLOW_EXAMPLES.md)
+2. Asegúrate de que tus tests pasen localmente
+3. Revisa la [Guía de CI/CD](ci/CI_CD_GUIDE.md) para entender la pipeline
 
-```bash
-ng generate component component-name
-```
+## 📖 Guías Disponibles
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 🧪 Tests
+| Documento | Descripción | Nivel |
+|-----------|-------------|-------|
+| [**TESTS_README.md**](tests/TESTS_README.md) | Guía rápida con comandos esenciales | 🟢 Básico |
+| [**TEST_GUIDE.md**](tests/TEST_GUIDE.md) | Guía completa de tests y cobertura | 🟡 Intermedio |
+| [**TEST_TROUBLESHOOTING.md**](tests/TEST_TROUBLESHOOTING.md) | Solución de problemas comunes | 🔴 Avanzado |
+| [**summary-preview.md**](tests/summary-preview.md) | Reporte de tests y cobertura actual | 📊 Reporte |
 
-```bash
-ng generate --help
-```
+### 🚀 CI/CD
+| Documento | Descripción | Nivel |
+|-----------|-------------|-------|
+| [**CI_CD_GUIDE.md**](ci/CI_CD_GUIDE.md) | Pipeline de GitHub Actions completa | 🟡 Intermedio |
+| [**CI_WORKFLOW_EXAMPLES.md**](ci/CI_WORKFLOW_EXAMPLES.md) | Ejemplos prácticos y casos de uso | 🟢 Básico |
 
-## Building
+### ⚙️ Configuración
+| Documento | Descripción | Nivel |
+|-----------|-------------|-------|
+| [**CHROME_CONFIG_README.md**](config/CHROME_CONFIG_README.md) | Quick start para configurar Chrome | 🟢 Básico |
+| [**CHROME_SETUP_GUIDE.md**](config/CHROME_SETUP_GUIDE.md) | Guía completa de configuración de Chrome | 🟡 Intermedio |
 
-To build the project run:
+## 🎯 Guías por Caso de Uso
 
-```bash
-ng build
-```
+### "Quiero ejecutar los tests"
+→ [Guía Rápida de Tests](tests/TESTS_README.md)
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### "Los tests no funcionan / Chrome no se encuentra"
+→ [Chrome Quick Start](config/CHROME_CONFIG_README.md)  
+→ [Solución de Problemas](tests/TEST_TROUBLESHOOTING.md)
 
-## Running unit tests
+### "Quiero crear un Pull Request"
+→ [Ejemplos de Workflow](ci/CI_WORKFLOW_EXAMPLES.md)
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### "Quiero entender la pipeline de CI/CD"
+→ [Guía de CI/CD](ci/CI_CD_GUIDE.md)
 
-```bash
-ng test
-```
+### "Quiero escribir tests"
+→ [Guía de Tests](tests/TEST_GUIDE.md)
 
-## Running end-to-end tests
+### "Tengo un problema específico con los tests"
+→ [Solución de Problemas](tests/TEST_TROUBLESHOOTING.md)
 
-For end-to-end (e2e) testing, run:
+## 📊 Estado Actual del Proyecto
 
-```bash
-ng e2e
-```
+Para ver el estado actual de tests y cobertura, consulta:
+- **[Summary Preview](tests/summary-preview.md)** - Reporte local
+- **[GitHub Actions](https://github.com/USUARIO/REPOSITORIO/actions)** - Pipeline en tiempo real
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## 🔄 Mantenimiento de la Documentación
 
-## Additional Resources
+### Ubicación de archivos .md
+- **README.md principal**: En la raíz del proyecto (`/README.md`)
+- **Documentación general**: En `/docs/` organizada por carpetas
+- **Documentación de tests**: En `/docs/tests/`
+- **Documentación de CI/CD**: En `/docs/ci/`
+- **Documentación de configuración**: En `/docs/config/`
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Convenciones
+- Usa títulos descriptivos con emojis para facilitar la navegación
+- Incluye tabla de contenidos en guías largas
+- Usa bloques de código con sintaxis resaltada
+- Añade enlaces relativos entre documentos relacionados
+- Mantén ejemplos actualizados con la versión del proyecto
 
-## 📚 Documentación del Proyecto
+## 🤝 Contribuir a la Documentación
 
-- **[CI/CD Guide](CI_CD_GUIDE.md)** - Guía completa sobre la pipeline de integración continua con GitHub Actions
-- **[Test Guide](TEST_GUIDE.md)** - Guía detallada para ejecutar y escribir tests
-- **[Test Troubleshooting](TEST_TROUBLESHOOTING.md)** - Solución de problemas comunes con tests
-- **[Chrome Setup Guide](CHROME_SETUP_GUIDE.md)** - Configuración de Chrome para ejecutar tests
+Si encuentras errores o quieres mejorar la documentación:
+
+1. Edita el archivo correspondiente en `docs/`
+2. Asegúrate de que los enlaces funcionen
+3. Sigue el estilo de los documentos existentes
+4. Haz commit con mensaje descriptivo: `docs: actualizar guía de tests`
+5. Crea un Pull Request
+
+## 📝 Convenciones de Estilo
+
+- **Títulos**: Usar emojis para categorías principales
+- **Código**: Usar bloques de código con lenguaje especificado
+- **Enlaces**: Usar enlaces relativos cuando sea posible
+- **Tablas**: Para comparaciones y listas estructuradas
+- **Warnings**: Usar > ⚠️ para advertencias importantes
+- **Tips**: Usar > 💡 para consejos útiles
+
+## 📚 Recursos Externos
+
+- [Angular Documentation](https://angular.dev)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Karma Documentation](https://karma-runner.github.io)
+- [Jasmine Documentation](https://jasmine.github.io)
+
+---
+
+**Última actualización:** Noviembre 2025  
+**Mantenedor:** Proyecto ProyectoFinal
 

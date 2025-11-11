@@ -2,6 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
+// src/app/services/api.service.ts
+import { requestCounter } from '../../otel-metrics';
+
+// Inside your HTTP request method
+requestCounter.add(1, { route: '/api/endpoint' });
 
 export interface PaginatedList<T> {
   items: T[];
