@@ -21,10 +21,21 @@ USER angular
 
 RUN npm ci --legacy-peer-deps --ignore-scripts
 
+# Establecer permisos de solo lectura en package files después de la instalación (seguridad)
+USER root
+RUN chmod 0444 package*.json
+USER angular
+
 # Copiar solo los archivos necesarios para el build
 # Evita copiar archivos sensibles o innecesarios (.dockerignore los excluye)
 COPY --chown=angular:nodejs tsconfig*.json ./
 COPY --chown=angular:nodejs angular.json ./
+
+# Establecer permisos de solo lectura en archivos de configuración (seguridad)
+USER root
+RUN chmod 0444 tsconfig*.json angular.json
+USER angular
+
 COPY --chown=angular:nodejs src ./src
 COPY --chown=angular:nodejs public ./public
 
@@ -51,6 +62,11 @@ USER angular
 
 RUN npm install --ignore-scripts
 
+# Establecer permisos de solo lectura en package files después de la instalación (seguridad)
+USER root
+RUN chmod 0444 package*.json
+USER angular
+
 # Copiar solo los archivos necesarios para desarrollo
 # Los archivos sensibles están excluidos por .dockerignore
 COPY --chown=angular:nodejs tsconfig*.json ./
@@ -58,6 +74,9 @@ COPY --chown=angular:nodejs angular.json ./
 COPY --chown=angular:nodejs karma.conf.js ./
 COPY --chown=angular:nodejs src ./src
 COPY --chown=angular:nodejs public ./public
+
+# Establecer permisos de solo lectura en archivos de configuración (seguridad)
+RUN chmod 0444 tsconfig*.json angular.json karma.conf.js
 
 # Variables de entorno para desarrollo
 ENV API_URL=http://finalproject:8080/api
