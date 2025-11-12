@@ -112,7 +112,7 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: Check Trivy scan results
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ secrets.ACR_REGISTRY }}/proyectofinal-web:${{ github.sha }}
           format: 'table'
