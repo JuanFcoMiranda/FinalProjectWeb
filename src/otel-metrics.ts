@@ -1,12 +1,16 @@
-import { MeterProvider } from '@opentelemetry/sdk-metrics';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
+import { MeterProvider, PeriodicExportingMetricReader, ConsoleMetricExporter } from '@opentelemetry/sdk-metrics';
 
-const exporter = new PrometheusExporter({ port: 9464 }, () => {
-  console.log('Prometheus scrape endpoint: http://localhost:9464/metrics');
+// Console exporter for browser environments
+const exporter = new ConsoleMetricExporter();
+
+// Periodic reader to export metrics every 60 seconds
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: exporter,
+  exportIntervalMillis: 60000, // Export every 60 seconds
 });
 
 const meterProvider = new MeterProvider({
-  readers: [exporter]
+  readers: [metricReader]
 });
 
 const meter = meterProvider.getMeter('angular-app-meter');
