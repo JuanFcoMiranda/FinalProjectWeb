@@ -4,51 +4,96 @@
 
 **Error Original:**
 ```
+Could not resolve "http"
 The package "http" wasn't found on the file system but is built into node.
 ```
 
 **Causa:**
-El código estaba intentando usar `@opentelemetry/exporter-prometheus` que depende de módulos nativos de Node.js (`http`, `net`, etc.) que no están disponibles en el navegador.
+El código estaba intentando usar `@opentelemetry/exporter-prometheus` que depende de módulos nativos de Node.js (`http`, `net`, etc.) que no están disponibles en el navegador. El PrometheusExporter crea un servidor HTTP para exponer métricas, lo cual solo funciona en entornos Node.js.
 
 ## 🔧 Solución Aplicada
 
-1. **Eliminado** el archivo `src/otel-metrics.ts` que contenía código incompatible con el navegador
-2. **Desinstalados** los paquetes de OpenTelemetry específicos de Node.js:
-   - `@opentelemetry/exporter-prometheus`
-   - `@opentelemetry/sdk-metrics`
-   - `@opentelemetry/api`
-3. **Removida** la importación en `todo.service.ts`
+1. **Reemplazado** `PrometheusExporter` con `ConsoleMetricExporter` en `src/otel-metrics.ts`
+   - ConsoleMetricExporter es compatible con navegadores
+   - Exporta métricas a la consola del navegador para desarrollo
+   
+2. **Desinstalado** el paquete incompatible:
+   ```bash
+   npm uninstall @opentelemetry/exporter-prometheus
+   ```
 
-## 📊 Implementación Correcta de OpenTelemetry para Frontend
+3. **Actualizado** el código para usar exporters compatibles con navegadores:
+   ```typescript
+   import { MeterProvider, PeriodicExportingMetricReader, ConsoleMetricExporter } from '@opentelemetry/sdk-metrics';
+   ```
 
-Si necesitas monitorización en tu aplicación Angular, usa estos paquetes compatibles con navegadores:
+## 📊 Implementación Actual de Métricas
 
-### 1. Instalar Dependencias Correctas
-
-```bash
-npm install @opentelemetry/api \
-  @opentelemetry/sdk-trace-web \
-  @opentelemetry/instrumentation-fetch \
-  @opentelemetry/instrumentation-xml-http-request \
-  @opentelemetry/exporter-trace-otlp-http
-```
-
-### 2. Configurar OpenTelemetry para Web
+### Archivo: `src/otel-metrics.ts`
 
 ```typescript
-// src/otel-web.ts
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
-import { XMLHttpRequestInstrumentation } from '@opentelemetry/instrumentation-xml-http-request';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { MeterProvider, PeriodicExportingMetricReader, ConsoleMetricExporter } from '@opentelemetry/sdk-metrics';
 
-export function initTelemetry() {
-  // Crear un exporter que envía trazas a un OpenTelemetry Collector
-  const exporter = new OTLPTraceExporter({
+// Console exporter for browser environments
+const exporter = new ConsoleMetricExporter();
+
+// Periodic reader to export metrics every 60 seconds
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: exporter,
+  exportIntervalMillis: 60000, // Export every 60 seconds
+});
+
+const meterProvider = new MeterProvider({
+  readers: [metricReader]
+});
+
+const meter = meterProvider.getMeter('angular-app-meter');
+const requestCounter = meter.createCounter('http_requests', {
+  description: 'Count all HTTP requests',
+});
+
+export { requestCounter };
+```
+
+## 🎯 Opciones de Exporters para Navegadores
+
+### 1. ConsoleMetricExporter (Actual - Para Desarrollo)
+✅ **Ventajas:**
+- Compatible con navegadores
+- Perfecto para desarrollo y debugging
+- Sin dependencias externas
+
+❌ **Desventajas:**
+- Solo para desarrollo, no para producción
+- Las métricas se pierden al cerrar el navegador
+
+### 2. OTLP HTTP Exporter (Recomendado para Producción)
+Para enviar métricas a un backend de OpenTelemetry:
+
+```typescript
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+
+const exporter = new OTLPMetricExporter({
+  url: 'https://your-collector:4318/v1/metrics',
+  headers: {},
+});
+```
+
+### 3. Custom Exporter
+Puedes crear tu propio exporter que envíe métricas a tu API backend.
+
+## 🚀 Para Implementar en Producción
+
+1. Instala el exporter OTLP:
+   ```bash
+   npm install @opentelemetry/exporter-metrics-otlp-http
+   ```
+
+2. Configura un OpenTelemetry Collector o servicio compatible (Jaeger, Grafana Cloud, etc.)
+
+3. Actualiza `otel-metrics.ts` para usar el OTLP exporter
+
+4. Configura la URL del collector en las variables de entorno
     url: 'http://localhost:4318/v1/traces', // URL del OTLP collector
   });
 
