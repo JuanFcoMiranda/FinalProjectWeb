@@ -49,6 +49,17 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} \
+            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }} \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ env.SONAR_TOKEN }} \
+            -Dsonar.sources=./src \
+            -Dsonar.tests=./src \
+            -Dsonar.test.inclusions=**/*.spec.ts,**/*.spec.js \
+            -Dsonar.typescript.lcov.reportPaths=coverage/final-project-web/lcov.info \
+            -Dsonar.sourceEncoding=UTF-8
 
 #      - name: Upload coverage to Codecov
 #        if: success()
