@@ -11,7 +11,7 @@ export default defineConfig({
     include: ['src/**/*.spec.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
+      reporter: ['text', 'json', 'json-summary', 'html', 'lcov'],
       exclude: [
         'node_modules/',
         'src/test-setup.ts',
@@ -28,5 +28,5 @@ export default defineConfig({
   define: {
     'import.meta.vitest': false,
   },
-});
+} as any); // Type assertion needed for Angular + Vitest compatibility
 

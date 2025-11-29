@@ -1,19 +1,12 @@
 const fs = require('node:fs');
 
 // ============================================================================
-// CONSTANTS
+// CONSTANTS - Updated for Vitest
 // ============================================================================
 
 const FILES = {
-  TEST_RESULTS: 'coverage/proyectoFinal/test-results.json',
-  LCOV_INFO: 'coverage/proyectoFinal/lcov.info',
-  COVERAGE_SUMMARY: 'coverage/proyectoFinal/coverage-summary.json'
-};
-
-const COMPLEXITY_THRESHOLDS = {
-  LOW: 5,
-  MEDIUM: 10,
-  HIGH: 20
+  COVERAGE_SUMMARY: 'coverage/coverage-summary.json',
+  LCOV_INFO: 'coverage/lcov.info'
 };
 
 const COVERAGE_THRESHOLDS = {
@@ -25,25 +18,6 @@ const COVERAGE_THRESHOLDS = {
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
-
-/**
- * Get test status icon based on test state
- */
-function getTestIcon(test) {
-  if (test.success) return '✅';
-  if (test.skipped) return '⏭️';
-  return '❌';
-}
-
-/**
- * Get complexity indicator based on average complexity
- */
-function getComplexityIndicator(avgComplexity) {
-  if (avgComplexity <= COMPLEXITY_THRESHOLDS.LOW) return '🟢';
-  if (avgComplexity <= COMPLEXITY_THRESHOLDS.MEDIUM) return '🟡';
-  if (avgComplexity <= COMPLEXITY_THRESHOLDS.HIGH) return '🟠';
-  return '🔴';
-}
 
 /**
  * Get coverage icon based on percentage
@@ -64,39 +38,16 @@ function getStatusEmoji(percentage) {
   return '🔴';
 }
 
-/**
- * Extract filename from full path
- */
-function getFileName(filePath) {
-  return filePath.split('\\').pop() || filePath.split('/').pop() || filePath;
-}
-
 // ============================================================================
 // DATA READING FUNCTIONS
 // ============================================================================
 
 /**
- * Read and parse test results JSON
- */
-function readTestResults() {
-  if (!fs.existsSync(FILES.TEST_RESULTS)) {
-    return null;
-  }
-
-  try {
-    const content = fs.readFileSync(FILES.TEST_RESULTS, 'utf8');
-    return JSON.parse(content);
-  } catch (e) {
-    console.log('Error parsing test results:', e);
-    return null;
-  }
-}
-
-/**
- * Read and parse coverage summary JSON
+ * Read and parse coverage summary JSON (Vitest format)
  */
 function readCoverageSummary() {
   if (!fs.existsSync(FILES.COVERAGE_SUMMARY)) {
+    console.log('❌ Coverage summary not found at:', FILES.COVERAGE_SUMMARY);
     return null;
   }
 
@@ -104,101 +55,10 @@ function readCoverageSummary() {
     const content = fs.readFileSync(FILES.COVERAGE_SUMMARY, 'utf8');
     return JSON.parse(content);
   } catch (e) {
-    console.log('Could not read coverage-summary.json:', e);
+    console.log('Error parsing coverage summary:', e);
     return null;
   }
 }
-
-/**
- * Parse LCOV file and extract coverage metrics
- */
-function parseLcovFile() {
-  if (!fs.existsSync(FILES.LCOV_INFO)) {
-    return null;
-  }
-
-  const content = fs.readFileSync(FILES.LCOV_INFO, 'utf8');
-  const metrics = {
-    totalLines: 0,
-    hitLines: 0,
-    totalFunctions: 0,
-    hitFunctions: 0,
-    totalBranches: 0,
-    hitBranches: 0,
-    totalStatements: 0,
-    hitStatements: 0
-  };
-
-  const lines = content.split('\n');
-  for (const line of lines) {
-    if (line.startsWith('LF:')) metrics.totalLines += Number.parseInt(line.substring(3));
-    else if (line.startsWith('LH:')) metrics.hitLines += Number.parseInt(line.substring(3));
-    else if (line.startsWith('FNF:')) metrics.totalFunctions += Number.parseInt(line.substring(4));
-    else if (line.startsWith('FNH:')) metrics.hitFunctions += Number.parseInt(line.substring(4));
-    else if (line.startsWith('BRF:')) metrics.totalBranches += Number.parseInt(line.substring(4));
-    else if (line.startsWith('BRH:')) metrics.hitBranches += Number.parseInt(line.substring(4));
-    else if (line.startsWith('DA:')) {
-      metrics.totalStatements++;
-      const parts = line.substring(3).split(',');
-      if (parts.length >= 2 && Number.parseInt(parts[1]) > 0) {
-        metrics.hitStatements++;
-      }
-    }
-  }
-
-  return metrics;
-}
-
-/**
- * Collect all tests from test results
- */
-function collectAllTests(testDetails) {
-  const allTests = [];
-  if (!testDetails.result) {
-    return allTests;
-  }
-
-  for (const browserId in testDetails.result) {
-    const tests = testDetails.result[browserId];
-    for (const test of tests) {
-      allTests.push(test);
-    }
-  }
-  return allTests;
-}
-
-// ============================================================================
-// CALCULATION FUNCTIONS
-// ============================================================================
-
-/**
- * Calculate coverage percentages from metrics
- */
-function calculateCoveragePercentages(metrics) {
-  return {
-    linesPct: metrics.totalLines ? ((metrics.hitLines / metrics.totalLines) * 100).toFixed(2) : 'N/A',
-    funcsPct: metrics.totalFunctions ? ((metrics.hitFunctions / metrics.totalFunctions) * 100).toFixed(2) : 'N/A',
-    branchesPct: metrics.totalBranches ? ((metrics.hitBranches / metrics.totalBranches) * 100).toFixed(2) : 'N/A',
-    statementsPct: metrics.totalStatements ? ((metrics.hitStatements / metrics.totalStatements) * 100).toFixed(2) : 'N/A'
-  };
-}
-
-/**
- * Calculate cyclomatic complexity
- */
-function calculateComplexity(metrics) {
-  const estimatedComplexity = metrics.totalBranches + metrics.totalFunctions + 1;
-  const avgComplexityPerFunction = metrics.totalFunctions > 0
-    ? (estimatedComplexity / metrics.totalFunctions).toFixed(2)
-    : 'N/A';
-
-  return {
-    total: estimatedComplexity,
-    average: avgComplexityPerFunction
-  };
-}
-
-/**
  * Calculate file-specific complexity
  */
 function calculateFileComplexity(fileData) {
@@ -338,44 +198,71 @@ function generateComplexityByFileTable(summaryPath) {
   const coverageData = readCoverageSummary();
   if (!coverageData) {
     return;
+
+// ============================================================================
+// SUMMARY GENERATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Generate header for summary
+ */
+function generateHeader(summaryPath) {
+  const testOutcome = process.env.TEST_OUTCOME || 'unknown';
+  const emoji = testOutcome === 'success' ? '✅' : '❌';
+
+  fs.appendFileSync(summaryPath, `# ${emoji} CI/CD Pipeline - Vitest Test Results\n\n`);
+  fs.appendFileSync(summaryPath, `**Status:** ${testOutcome}\n`);
+  fs.appendFileSync(summaryPath, `**Framework:** Vitest\n`);
+  fs.appendFileSync(summaryPath, `**Date:** ${new Date().toISOString()}\n\n`);
+  fs.appendFileSync(summaryPath, '---\n\n');
+}
+
+/**
+ * Generate coverage summary table
+ */
+function generateCoverageSummary(summaryPath, coverageData) {
+  if (!coverageData || !coverageData.total) {
+    fs.appendFileSync(summaryPath, `## ❌ Coverage Report Not Available\n\n`);
+    fs.appendFileSync(summaryPath, `Coverage data could not be found or parsed.\n\n`);
+    return;
   }
 
-  fs.appendFileSync(summaryPath, '### 🔍 Complexity by File\n\n');
-  fs.appendFileSync(summaryPath, '| File | Functions | Branches | Est. Complexity | Avg/Function |\n');
-  fs.appendFileSync(summaryPath, '|------|-----------|----------|-----------------|---------------|\n');
+  const total = coverageData.total;
 
-  for (const filePath in coverageData) {
-    if (filePath === 'total') continue;
+  fs.appendFileSync(summaryPath, '## 📊 Coverage Summary\n\n');
+  fs.appendFileSync(summaryPath, '| Metric | Coverage | Covered | Total | Status |\n');
+  fs.appendFileSync(summaryPath, '|--------|----------|---------|-------|--------|\n');
 
-    const fileData = coverageData[filePath];
-    const fileName = getFileName(filePath);
-    const complexity = calculateFileComplexity(fileData);
+  const metrics = ['statements', 'branches', 'functions', 'lines'];
 
-    let complexityIndicator = '';
-    if (complexity.functions > 0) {
-      const avg = Number.parseFloat(complexity.average);
-      complexityIndicator = getComplexityIndicator(avg);
-    }
+  for (const metric of metrics) {
+    const data = total[metric];
+    const icon = getCoverageIcon(data.pct);
+    const capitalizedMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
 
-    fs.appendFileSync(summaryPath, `| ${fileName} | ${complexity.functions} | ${complexity.branches} | ${complexityIndicator} ${complexity.total} | ${complexity.average} |\n`);
+    fs.appendFileSync(summaryPath,
+      `| ${capitalizedMetric} | **${data.pct}%** | ${data.covered} | ${data.total} | ${icon} |\n`
+    );
   }
 
   fs.appendFileSync(summaryPath, '\n');
-  fs.appendFileSync(summaryPath, '> 🟢 Low (≤5) | 🟡 Medium (6-10) | 🟠 High (11-20) | 🔴 Very High (>20)\n\n');
+  fs.appendFileSync(summaryPath, '> 🟢 Excellent (≥80%) | 🟡 Good (≥60%) | 🔴 Needs Improvement (<60%)\n\n');
+
+  // Generate progress bar
+  generateCoverageProgressBar(summaryPath, total.lines.pct);
 }
 
 /**
  * Generate coverage progress bar
  */
-function generateCoverageProgressBar(summaryPath, percentages) {
-  const overallPct = Number.parseFloat(percentages.linesPct);
-  const statusEmoji = getStatusEmoji(overallPct);
+function generateCoverageProgressBar(summaryPath, percentage) {
+  const statusEmoji = getStatusEmoji(percentage);
 
   fs.appendFileSync(summaryPath, `### 📈 Coverage Progress\n\n`);
 
   // Create visual bar
   const totalBlocks = 30;
-  const filledBlocks = Math.round((overallPct / 100) * totalBlocks);
+  const filledBlocks = Math.round((percentage / 100) * totalBlocks);
   const emptyBlocks = totalBlocks - filledBlocks;
 
   const fullBlock = '█';
@@ -383,7 +270,7 @@ function generateCoverageProgressBar(summaryPath, percentages) {
   const visualBar = fullBlock.repeat(filledBlocks) + emptyBlock.repeat(emptyBlocks);
 
   fs.appendFileSync(summaryPath, `<table><tr><td>\n\n`);
-  fs.appendFileSync(summaryPath, `${statusEmoji} **${percentages.linesPct}%** Lines Covered\n\n`);
+  fs.appendFileSync(summaryPath, `${statusEmoji} **${percentage}%** Lines Covered\n\n`);
   fs.appendFileSync(summaryPath, '```\n');
   fs.appendFileSync(summaryPath, `${visualBar}\n`);
   fs.appendFileSync(summaryPath, '```\n\n');
@@ -391,11 +278,34 @@ function generateCoverageProgressBar(summaryPath, percentages) {
 }
 
 /**
- * Generate coverage not found message
+ * Generate file-by-file coverage table
  */
-function generateCoverageNotFound(summaryPath) {
-  fs.appendFileSync(summaryPath, `## ❌ Coverage Report Not Found\n\n`);
-  fs.appendFileSync(summaryPath, `Could not find coverage file at: \`${FILES.LCOV_INFO}\`\n\n`);
+function generateFileCoverageTable(summaryPath, coverageData) {
+  if (!coverageData) return;
+
+  fs.appendFileSync(summaryPath, '## 📁 Coverage by File\n\n');
+  fs.appendFileSync(summaryPath, '<details>\n');
+  fs.appendFileSync(summaryPath, '<summary>Click to expand file coverage details</summary>\n\n');
+  fs.appendFileSync(summaryPath, '| File | Statements | Branches | Functions | Lines |\n');
+  fs.appendFileSync(summaryPath, '|------|------------|----------|-----------|-------|\n');
+
+  for (const filePath in coverageData) {
+    if (filePath === 'total') continue;
+
+    const fileData = coverageData[filePath];
+    const fileName = filePath.replace(/^.*[\\\/]/, '').substring(0, 50);
+
+    const stmtIcon = getCoverageIcon(fileData.statements.pct);
+    const branchIcon = getCoverageIcon(fileData.branches.pct);
+    const funcIcon = getCoverageIcon(fileData.functions.pct);
+    const lineIcon = getCoverageIcon(fileData.lines.pct);
+
+    fs.appendFileSync(summaryPath,
+      `| ${fileName} | ${stmtIcon} ${fileData.statements.pct}% | ${branchIcon} ${fileData.branches.pct}% | ${funcIcon} ${fileData.functions.pct}% | ${lineIcon} ${fileData.lines.pct}% |\n`
+    );
+  }
+
+  fs.appendFileSync(summaryPath, '\n</details>\n\n');
 }
 
 // ============================================================================
@@ -403,32 +313,33 @@ function generateCoverageNotFound(summaryPath) {
 // ============================================================================
 
 /**
- * Generate complete CI Summary with test results and coverage information
+ * Generate complete CI Summary with Vitest coverage information
  */
 function generateSummary() {
   const summaryPath = process.env.GITHUB_STEP_SUMMARY;
-  const testOutcome = process.env.TEST_OUTCOME;
+
+  if (!summaryPath) {
+    console.log('❌ GITHUB_STEP_SUMMARY environment variable not set');
+    console.log('This script is meant to run in GitHub Actions');
+    return;
+  }
 
   // Generate header
   generateHeader(summaryPath);
 
-  // Read and process test results
-  const testDetails = readTestResults();
-  generateTestSummary(summaryPath, testOutcome, testDetails);
-  generateTestDetailsTable(summaryPath, testDetails);
-  generateFailedTestDetails(summaryPath, testDetails);
-
   // Read and process coverage data
-  const metrics = parseLcovFile();
-  if (metrics) {
-    const percentages = calculateCoveragePercentages(metrics);
-    const complexity = calculateComplexity(metrics);
+  const coverageData = readCoverageSummary();
 
-    generateCoverageMetricsTable(summaryPath, metrics, percentages, complexity);
-    generateComplexityByFileTable(summaryPath);
-    generateCoverageProgressBar(summaryPath, percentages);
+  if (coverageData) {
+    generateCoverageSummary(summaryPath, coverageData);
+    generateFileCoverageTable(summaryPath, coverageData);
+
+    fs.appendFileSync(summaryPath, '---\n\n');
+    fs.appendFileSync(summaryPath, '💡 **Tip:** Run `npm run test:coverage` locally to see detailed coverage reports.\n');
   } else {
-    generateCoverageNotFound(summaryPath);
+    fs.appendFileSync(summaryPath, `## ❌ Coverage Not Available\n\n`);
+    fs.appendFileSync(summaryPath, `Coverage file not found at: \`${FILES.COVERAGE_SUMMARY}\`\n\n`);
+    fs.appendFileSync(summaryPath, `Make sure to run tests with coverage enabled: \`npm run test:ci\`\n`);
   }
 
   console.log('✅ Summary generated successfully');
