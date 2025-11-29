@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalComponent } from './modal.component';
 import { By } from '@angular/platform-browser';
+import { vi } from 'vitest';
 
 describe('ModalComponent', () => {
   let fixture: ComponentFixture<ModalComponent>;
@@ -30,7 +31,7 @@ describe('ModalComponent', () => {
   it('should emit close on backdrop click', () => {
     component.open = true;
     fixture.detectChanges();
-    spyOn(component.closed, 'emit');
+    vi.spyOn(component.closed, 'emit');
     const backdrop = fixture.debugElement.query(By.css('.modal-backdrop'));
     backdrop.triggerEventHandler('click', { target: backdrop.nativeElement });
     expect(component.closed.emit).toHaveBeenCalled();

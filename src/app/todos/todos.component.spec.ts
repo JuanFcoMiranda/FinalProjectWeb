@@ -2,20 +2,25 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { TodosComponent } from './todos.component';
 import { TodoService } from './todo.service';
+import { vi } from 'vitest';
 
 describe('TodosComponent', () => {
   let component: TodosComponent;
   let fixture: ComponentFixture<TodosComponent>;
-  let mockService: jasmine.SpyObj<TodoService>;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let mockService: any;
+  let mockRouter: any;
 
-  beforeEach(async () => {mockService = jasmine.createSpyObj('TodoService', ['list', 'create', 'delete', 'update']);
-    mockService.list.and.returnValue(Promise.resolve({ items: [], pageNumber: 1, totalPages: 1, totalCount: 0 }));
-    mockService.create.and.returnValue(Promise.resolve(1));
-    mockService.delete.and.returnValue(Promise.resolve());
-    mockService.update.and.returnValue(Promise.resolve());
+  beforeEach(async () => {
+    mockService = {
+      list: vi.fn().mockResolvedValue({ items: [], pageNumber: 1, totalPages: 1, totalCount: 0 }),
+      create: vi.fn().mockResolvedValue(1),
+      delete: vi.fn().mockResolvedValue(undefined),
+      update: vi.fn().mockResolvedValue(undefined)
+    };
 
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockRouter = {
+      navigate: vi.fn()
+    };
 
     await TestBed.configureTestingModule({
       imports: [TodosComponent],
@@ -47,7 +52,7 @@ describe('TodosComponent', () => {
   });
 
   it('remove() should call service.delete and reload', async () => {
-    mockService.list.calls.reset();
+    mockService.list.mockClear();
     await component.remove(5);
     expect(mockService.delete).toHaveBeenCalledWith(5);
     expect(mockService.list).toHaveBeenCalled();
