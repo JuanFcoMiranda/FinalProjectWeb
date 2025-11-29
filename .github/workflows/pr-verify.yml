@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [24.x, 25.x]
+        node-version: [20.x, 24.x, 25.x]
 
     steps:
       - name: Checkout code
@@ -38,14 +38,14 @@ jobs:
 
       - name: Run tests with Vitest
         id: run-tests
-        run: npm run test:run
+        run: npm run test:coverage
         continue-on-error: false
 
       - name: Upload test results
-        if: always()
+        if: always() && matrix.node-version == '24.x'
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-node-${{ matrix.node-version }}
+          name: test-results
           path: coverage/
           retention-days: 7
 
