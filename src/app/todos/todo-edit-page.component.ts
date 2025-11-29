@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { TodoService, TodoItemBrief } from './todo.service';
 import { TodoEditComponent } from './todo-edit.component';
@@ -7,7 +7,7 @@ import { TodoEditComponent } from './todo-edit.component';
 @Component({
   selector: 'app-todo-edit-page',
   standalone: true,
-  imports: [CommonModule, TodoEditComponent],
+  imports: [TodoEditComponent],
   templateUrl: './todo-edit-page.component.html',
   styleUrls: ['./todo-edit-page.component.css']
 })

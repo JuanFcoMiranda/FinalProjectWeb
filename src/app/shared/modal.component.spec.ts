@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalComponent } from './modal.component';
 import { By } from '@angular/platform-browser';
+import { vi } from 'vitest';
 
 describe('ModalComponent', () => {
   let fixture: ComponentFixture<ModalComponent>;
@@ -10,7 +11,7 @@ describe('ModalComponent', () => {
     await TestBed.configureTestingModule({ imports: [ModalComponent] }).compileComponents();
     fixture = TestBed.createComponent(ModalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges here - let each test control it
   });
 
   it('should not render when closed', () => {
@@ -19,18 +20,22 @@ describe('ModalComponent', () => {
     expect(fixture.debugElement.query(By.css('.modal-backdrop'))).toBeNull();
   });
 
-  it('should render when open', () => {
+  it('should render when open', async () => {
     component.open = true;
     component.title = 'Test';
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(fixture.debugElement.query(By.css('.modal-backdrop'))).not.toBeNull();
     expect(fixture.debugElement.query(By.css('.app-modal h3')).nativeElement.textContent).toContain('Test');
   });
 
-  it('should emit close on backdrop click', () => {
+  it('should emit close on backdrop click', async () => {
     component.open = true;
     fixture.detectChanges();
-    spyOn(component.closed, 'emit');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    vi.spyOn(component.closed, 'emit');
     const backdrop = fixture.debugElement.query(By.css('.modal-backdrop'));
     backdrop.triggerEventHandler('click', { target: backdrop.nativeElement });
     expect(component.closed.emit).toHaveBeenCalled();

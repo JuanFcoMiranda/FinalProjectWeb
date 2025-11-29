@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [24.x, 25.x]
 
     steps:
       - name: Checkout code
@@ -33,15 +33,22 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Run tests
+      - name: Run tests with Vitest
         id: run-tests
-        run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI --code-coverage
+        run: npm run test:ci
         continue-on-error: true
 
-      - name: Generate CI Summary (tests + coverage)
+      - name: Generate CI Summary (coverage)
+        if: always()
         env:
           TEST_OUTCOME: ${{ steps.run-tests.outcome }}
         run: node .github/scripts/generate-summary.js
+
+      - name: Check test results
+        if: steps.run-tests.outcome == 'failure'
+        run: |
+          echo "::error::Tests failed. Check the test output for details."
+          exit 1
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
@@ -57,8 +64,9 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=./src
             -Dsonar.tests=./src
-            -Dsonar.test.inclusions=**/*.spec.ts,**/*.spec.js
-            -Dsonar.typescript.lcov.reportPaths=coverage/final-project-web/lcov.info
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.sourceEncoding=UTF-8
 
 #      - name: Upload coverage to Codecov
@@ -66,7 +74,7 @@ jobs:
 #        uses: codecov/codecov-action@v3
 #        with:
 #          fail_ci_if_error: false
-#          files: ./coverage/final-project-web/lcov.info
+#          files: ./coverage/lcov.info
 
   build-and-push-docker:
     name: Build and Push Docker Image

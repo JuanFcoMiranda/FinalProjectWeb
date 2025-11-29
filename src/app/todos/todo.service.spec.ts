@@ -68,7 +68,7 @@ describe('TodoService', () => {
     const req = expectRequest({ url: base, method: 'POST', body: { title: 'new title' } });
     req.flush(null);
 
-    await expectAsync(createPromise).toBeRejectedWithError('Create API did not return an id');
+    await expect(createPromise).rejects.toThrow('Create API did not return an id');
   });
 
   it('delete() should call DELETE on the correct URL', async () => {
@@ -98,6 +98,6 @@ describe('TodoService', () => {
     const p = service.get(999);
     const req = expectRequest({ url: `${base}/999`, method: 'GET' });
     req.flush(null, { status: 404, statusText: 'Not Found' });
-    await expectAsync(p).toBeRejected();
+    await expect(p).rejects.toThrow();
   });
 });
