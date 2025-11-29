@@ -6,6 +6,11 @@ on:
       - main
       - develop
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   validate:
     name: PR Verify
@@ -40,12 +45,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-node-${{ matrix.node-version }}
           path: coverage/
           retention-days: 7
 
       - name: Comment PR with test results
-        if: always() && github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request' && matrix.node-version == '24.x'
         uses: actions/github-script@v7
         with:
           script: |
@@ -77,9 +82,31 @@ jobs:
               comment += '\n_Coverage report not available_\n';
             }
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            // Check if a comment already exists from this workflow
+            const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
+              issue_number: context.issue.number,
             });
+
+            const botComment = comments.data.find(comment =>
+              comment.user.type === 'Bot' && comment.body.includes('Test Results')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
