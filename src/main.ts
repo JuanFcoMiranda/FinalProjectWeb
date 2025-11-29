@@ -4,7 +4,7 @@ import { AppComponent } from './app/app.component';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './app/core/auth.interceptor';
 import { AUTH_DISABLED, AuthService } from './app/core/auth.service';
-import { inject as coreInject, provideAppInitializer } from '@angular/core';
+import { inject as coreInject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { routes } from './app/app.routes';
 
 const providers = [
@@ -39,5 +39,5 @@ providers.push(provideAppInitializer(() => {
 
 // Remove top-level await and use .catch() instead
 bootstrapApplication(AppComponent, {
-  providers
+  providers: [provideZoneChangeDetection(), ...providers]
 }).catch(err => console.error(err));

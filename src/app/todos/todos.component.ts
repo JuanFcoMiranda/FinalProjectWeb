@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { TodoService, TodoItemBrief } from './todo.service';
 import { ModalComponent } from '../shared/modal.component';
@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-todos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ModalComponent],
+  imports: [ReactiveFormsModule, ModalComponent],
   templateUrl: './todos.component.html',
   styleUrls: ['./todos.component.css']
 })
